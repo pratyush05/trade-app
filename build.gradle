@@ -1,0 +1,110 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
+    id 'java'
+    id 'nu.studer.jooq' version '3.0.3'
+}
+
+description = 'TradeApp : Trading application with RESTful APIs.'
+group = 'com.example'
+sourceCompatibility = 1.11
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.zaxxer:HikariCP:2.7.8'
+    implementation 'io.vertx:vertx-core:3.7.1'
+    implementation 'io.vertx:vertx-web:3.7.1'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    implementation 'org.jooq:jooq:3.11.11'
+    implementation 'org.liquibase:liquibase-core:3.6.1'
+    implementation 'org.postgresql:postgresql:42.1.4'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+
+    jooqRuntime 'org.postgresql:postgresql:42.1.4'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+jooq {
+    // Refer https://www.jooq.org/xsd/jooq-codegen-3.11.0.xsd for the full set of configuration options
+    sample(sourceSets.main) {
+        jdbc {
+            // url, trader and password are loaded from gradle.properties file in the project root directory
+            driver = 'org.postgresql.Driver'
+            url = jdbcUrl
+            schema = 'public'
+            user = jdbcUser
+            password = jdbcPassword
+        }
+        generator {
+            name = 'org.jooq.codegen.DefaultGenerator'
+            strategy {
+                name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+            }
+            database {
+                name = 'org.jooq.meta.postgres.PostgresDatabase'
+                inputSchema = 'public'
+                // Tables to be excluded
+                excludes = 'databasechangelog|databasechangeloglock|sample|staging'
+            }
+            generate {
+                // Turn off generation of all SQL comments as Javadoc on all objects
+                comments = false
+                // Turn off generation of deprecated code for backwards compatibility
+                deprecated = false
+                // Generate immutable POJOs
+                immutablePojos = true
+                // Generated interfaces to be implemented by records and/or POJOs
+                interfaces = true
+                // Generate fluent setters in records, POJOs, interfaces
+                fluentSetters = true
+            }
+            target {
+                clean = true
+                directory = 'src/generated/jooq'
+                encoding = 'UTF-8'
+                packageName = 'org.jooq.generated'
+            }
+        }
+    }
+}
+
+run {
+    applicationName = 'TradeApp'
+    args = [
+            'run',
+            'com.example.pratyush.verticle.MainVerticle',
+            '--conf',
+            'config.json'
+    ]
+    jvmArgs = ['--illegal-access=deny']
+    mainClassName = 'io.vertx.core.Launcher'
+}
+
+shadowJar {
+    baseName = project.getName()
+    classifier = 'fat'
+    manifest {
+        attributes 'Build-Jdk': "${System.properties['java.vendor']} ${System.properties['java.version']}"
+        attributes 'Built-By': 'Pratyush Gupta'
+        attributes 'Gradle-Version': gradle.getGradleVersion()
+        attributes 'Main-Class': application.getMainClassName()
+        attributes 'Main-Verticle': 'com.example.pratyush.verticle.MainVerticle'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+    version = project.getVersion()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["src/generated/jooq"]
+        }
+    }
+}

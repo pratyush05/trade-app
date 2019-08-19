@@ -1,0 +1,10 @@
+{
+  "database.driver": "org.postgresql.Driver",
+  "database.max_pool_size": "30",
+  "database.password": "postgres",
+  "database.schema": "public",
+  "database.url": "jdbc:postgresql://localhost:5432/sample",
+  "database.user": "postgres",
+  "http.port": "9999",
+  "liquibase.execute": "true"
+}
