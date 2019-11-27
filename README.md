@@ -9,7 +9,7 @@
 ##### Sample example:
     Request:
     curl -X GET \
-    http://localhost:9999/v1/stock \
+    http://localhost:9999/v1/trader \
     -H 'Accept: */*' \
     -H 'Accept-Encoding: gzip, deflate' \
     -H 'Cache-Control: no-cache' \
