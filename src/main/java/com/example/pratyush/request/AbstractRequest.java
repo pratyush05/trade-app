@@ -4,5 +4,5 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 
 public abstract class AbstractRequest {
-    public abstract Future run(HttpServerRequest request);
+    public abstract Future<? extends Object> run(HttpServerRequest request);
 }
